@@ -12,7 +12,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!validateEmail(email)) {
       toast.error("Please enter a valid email address.", {
         position: "top-right",
@@ -50,6 +50,30 @@ const Signup = () => {
         progress: undefined,
       });
       return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          cpassword: confirmPassword,
+        }),
+      });
+  
+      if (response.status === 201) {
+        console.log("successfull")
+      } else {
+        // Handle registration error, display error message from the response.
+        const data = await response.json();
+        console.log(" err")
+      }
+    } catch (error) {
+      console.log("catch err")
     }
   };
 
