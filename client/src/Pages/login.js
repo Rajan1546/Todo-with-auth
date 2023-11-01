@@ -145,6 +145,7 @@ const LoginPage = () => {
                 className="custom-icon-class"
               ></box-icon>
               <span>New User?</span>
+              <h1>ghvdcvc</h1>
             </button>
           </div>
         </div>
