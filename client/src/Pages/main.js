@@ -93,8 +93,8 @@ const addTask = async (selectedDate) => {
 
 export default function Main() {
   const [selectedDate, setSelectedDate] = useState(null);
-
-  const [cleared, setCleared] = React.useState(false);
+  const [cleared, setCleared] = useState(false);
+  const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
     if (cleared) {
@@ -107,7 +107,7 @@ export default function Main() {
     return () => {};
   }, [cleared]);
 
-  const [tasks, setTasks] = React.useState([]);
+ 
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -115,6 +115,7 @@ export default function Main() {
         const response = await fetch("http://localhost:8000/api/tasks");
         if (response.status === 200) {
           const data = await response.json();
+          console.log(data);
           setTasks(data);
         } else {
           // Handle errors, display error message, etc.
@@ -284,15 +285,15 @@ export default function Main() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
-                  <StyledTableRow key={row.name}>
+              {tasks.map((task) => (
+                  <StyledTableRow key={task._id}>
                     <StyledTableCell component="th" scope="row" align="left">
-                      {row.name}
+                    {task.task}
                     </StyledTableCell>
                     <StyledTableCell align="left">
-                      {row.calories}
+                    {task.dueDate}
                     </StyledTableCell>
-                    <StyledTableCell align="left">{row.fat}</StyledTableCell>
+                    <StyledTableCell align="left">{task.status}</StyledTableCell>
                     <StyledTableCell align="left">
                       <ThemeProvider theme={createTheme()}>
                         <Button
