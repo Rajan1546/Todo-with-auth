@@ -1,5 +1,4 @@
 const { default: mongoose } = require("mongoose");
-const moongoose = require("mongoose");
 
 module.exports=()=>{
     const connectionParams = {

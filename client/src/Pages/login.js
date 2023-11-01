@@ -24,7 +24,7 @@ const LoginPage = () => {
       });
       return;
     }
-
+    
     if (!validatePassword(password)) {
       toast.error("Please enter a valid password.", {
         position: "top-right",
@@ -145,7 +145,6 @@ const LoginPage = () => {
                 className="custom-icon-class"
               ></box-icon>
               <span>New User?</span>
-              <h1>ghvdcvc</h1>
             </button>
           </div>
         </div>

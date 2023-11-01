@@ -67,6 +67,7 @@ const Signup = () => {
   
       if (response.status === 201) {
         console.log("successfull")
+        navigate("/main")
       } else {
         // Handle registration error, display error message from the response.
         const data = await response.json();
