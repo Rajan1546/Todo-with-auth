@@ -1,4 +1,4 @@
-import React, { useState , useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { createTheme, ThemeProvider, Box, Button } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { DemoItem } from "@mui/x-date-pickers/internals/demo";
@@ -64,7 +64,7 @@ const rows = [
 const addTask = async (selectedDate) => {
   try {
     const task = document.getElementById("outlined-basic").value;
-    const dueDate = selectedDate && selectedDate.toISOString();   
+    const dueDate = selectedDate && selectedDate.toISOString();
 
     if (!dueDate) {
       console.error("Invalid due date");
@@ -95,7 +95,14 @@ export default function Main() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [cleared, setCleared] = useState(false);
   const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
 
+
+  const handleEditClick = (task) => {
+    setSelectedTask(task);
+    setSelectedDate(new Date(task.dueDate)); // Convert dueDate to a Date object
+  };
+    
   useEffect(() => {
     if (cleared) {
       const timeout = setTimeout(() => {
@@ -107,8 +114,6 @@ export default function Main() {
     return () => {};
   }, [cleared]);
 
- 
-
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -119,7 +124,11 @@ export default function Main() {
           setTasks(data);
         } else {
           // Handle errors, display error message, etc.
-          console.error("Error fetching tasks:", response.status, response.statusText);
+          console.error(
+            "Error fetching tasks:",
+            response.status,
+            response.statusText
+          );
         }
       } catch (error) {
         console.error("Error fetching tasks", error);
@@ -128,6 +137,110 @@ export default function Main() {
 
     fetchTasks();
   }, []); // The empty dependency array ensures this effect runs once on component mount.
+  
+  const deleteTask = async (taskId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/tasks/${taskId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.status === 200) {
+        // Task deleted successfully. Update the tasks state to remove the deleted task.
+        setTasks((prevTasks) =>
+          prevTasks.filter((task) => task._id !== taskId)
+        );
+        console.log("Task deleted successfully");
+      } else {
+        // Handle errors, display error message, etc.
+        const data = await response.json();
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting task", error);
+    }
+  };
+
+  const toggleStatus = async (taskId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === "Pending" ? "Completed" : "Pending";
+      const response = await fetch(
+        `http://localhost:8000/api/tasks/${taskId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      if (response.status === 200) {
+        // Task status updated successfully. Update the tasks state with the new status.
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task._id === taskId ? { ...task, status: newStatus } : task
+          )
+        );
+        console.log("Task status updated successfully");
+      } else {
+        // Handle errors, display error message, etc.
+        const data = await response.json();
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error updating task status", error);
+    }
+  };
+
+  const deleteAllTasks = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/tasks/deleteall",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            // Add any other headers if needed
+          },
+        }
+      );
+      if (response.status === 200) {
+         
+        setTasks([]);
+        console.log("All tasks deleted successfully");
+      } else {
+        // Handle errors, display error message, etc.
+        const data = await response.json();
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting all tasks", error);
+    }
+  };
+
+  const filterTasks = async (status) => {
+    try {
+      const response = await fetch("http://localhost:8000/api/tasks");
+      if (response.status === 200) {
+        const data = await response.json();
+        // Filter the tasks based on the status
+        const filteredTasks = data.filter((task) => task.status === status);
+        setTasks(filteredTasks);
+      } else {
+        // Handle errors, display error message, etc.
+        console.error(
+          "Error fetching tasks:",
+          response.status,
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching tasks", error);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -137,11 +250,11 @@ export default function Main() {
           className="logo"
         />
       </div>
-      <Container sx={{ height: "90vh", mt: 5 }}>
+      <Container sx={{ mt: 5 }}>
         <Box
           component="form"
           sx={{
-            "& > :not(style)": { m: 1, width: "97.5%", height: "100%" },
+            "& > :not(style)": { m: 1, width: "97.5%" },
             display: "grid",
             justifyContent: "center",
             alignItems: "center",
@@ -183,7 +296,7 @@ export default function Main() {
                           },
                         }}
                         value={selectedDate}
-                        onChange={(newDate) => setSelectedDate(newDate)} // Update the selected date                
+                        onChange={(newDate) => setSelectedDate(newDate)} // Update the selected date
                       />
                     </DemoItem>
 
@@ -213,7 +326,7 @@ export default function Main() {
                         backgroundColor: "#F9D72F",
                       },
                     }}
-                    onClick={() => addTask(selectedDate)} 
+                    onClick={() => addTask(selectedDate)}
                   >
                     Add
                   </Button>
@@ -227,6 +340,35 @@ export default function Main() {
               spacing={2}
               sx={{ justifyContent: "space-between" }}
             >
+              {/* <PopupState variant="popover" popupId="demo-popup-menu">
+                {(popupState) => (
+                  <React.Fragment>
+                    <Button
+                      variant="contained"
+                      {...bindTrigger(popupState)}
+                      endIcon={<FilterAltOutlinedIcon />}
+                      sx={{
+                        px: 1,
+                        py: 1,
+                        color: " #18182F",
+                        backgroundColor: "#F9D72F",
+                        "&:hover": {
+                          opacity: 1,
+                          backgroundColor: "#F9D72F",
+                        },
+                      }}
+                      
+                    >
+                      Filter
+                    </Button>
+                    <Menu {...bindMenu(popupState)}>
+                      <MenuItem onClick={popupState.close}>All</MenuItem>
+                      <MenuItem onClick={popupState.close} onClick={() => filterTasks("Completed")}>Completed</MenuItem>
+                      <MenuItem onClick={popupState.close} onClick={() => filterTasks("pending")}>pending</MenuItem>
+                    </Menu>
+                  </React.Fragment>
+                )}
+              </PopupState> */}
               <PopupState variant="popover" popupId="demo-popup-menu">
                 {(popupState) => (
                   <React.Fragment>
@@ -248,13 +390,20 @@ export default function Main() {
                       Filter
                     </Button>
                     <Menu {...bindMenu(popupState)}>
-                      <MenuItem onClick={popupState.close}>All</MenuItem>
-                      <MenuItem onClick={popupState.close}>Completed</MenuItem>
-                      <MenuItem onClick={popupState.close}>pending</MenuItem>
+                      <MenuItem onClick={() => filterTasks("All")}>
+                        All
+                      </MenuItem>
+                      <MenuItem onClick={() => filterTasks("Completed")}>
+                        Completed
+                      </MenuItem>
+                      <MenuItem onClick={() => filterTasks("Pending")}>
+                        Pending
+                      </MenuItem>
                     </Menu>
                   </React.Fragment>
                 )}
               </PopupState>
+
               <Button
                 variant="contained"
                 endIcon={<DeleteOutlineIcon />}
@@ -269,12 +418,16 @@ export default function Main() {
                   },
                 }}
                 align="right"
+                onClick={deleteAllTasks}
               >
                 Delete All
               </Button>
             </Stack>
           </div>
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+            sx={{ height: "400px", overflowX: "hidden", overflowY: "auto" }}
+          >
             <Table sx={{ minWidth: 700 }} aria-label="customized table">
               <TableHead>
                 <TableRow>
@@ -285,15 +438,17 @@ export default function Main() {
                 </TableRow>
               </TableHead>
               <TableBody>
-              {tasks.map((task) => (
+                {tasks.map((task) => (
                   <StyledTableRow key={task._id}>
                     <StyledTableCell component="th" scope="row" align="left">
-                    {task.task}
+                      {task.task}
                     </StyledTableCell>
                     <StyledTableCell align="left">
-                    {task.dueDate}
+                      {task.dueDate}
                     </StyledTableCell>
-                    <StyledTableCell align="left">{task.status}</StyledTableCell>
+                    <StyledTableCell align="left">
+                      {task.status}
+                    </StyledTableCell>
                     <StyledTableCell align="left">
                       <ThemeProvider theme={createTheme()}>
                         <Button
@@ -314,6 +469,8 @@ export default function Main() {
                             color: "#18182F",
                             backgroundColor: "#36D399",
                           }}
+                          onClick={() => toggleStatus(task._id, task.status)}
+                          style={{ cursor: "pointer" }}
                         >
                           <CheckIcon />
                         </Button>
@@ -324,6 +481,7 @@ export default function Main() {
                             color: "#18182F",
                             backgroundColor: "#F87272",
                           }}
+                          onClick={() => deleteTask(task._id)}
                         >
                           <DeleteIcon />
                         </Button>
