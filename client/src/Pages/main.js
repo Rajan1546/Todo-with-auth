@@ -5,6 +5,7 @@ import { DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from 'dayjs';
 import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
 import Stack from "@mui/material/Stack";
@@ -89,11 +90,13 @@ export default function Main() {
   const [cleared, setCleared] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [taskText, setTaskText] = useState(""); // Add the taskText state
 
 
   const handleEditClick = (task) => {
     setSelectedTask(task);
     setSelectedDate(new Date(task.dueDate)); // Convert dueDate to a Date object
+    setTaskText(task.task); // Populate the task text
   };
     
   useEffect(() => {
@@ -235,6 +238,9 @@ export default function Main() {
     }
   };
 
+  const dueDate = '2023-10-31'; // Replace with your actual date string
+const dueDateObj = dayjs(dueDate).toDate(); // Convert to a JavaScript Date object
+
   return (
     <React.Fragment>
       <div>
@@ -263,6 +269,8 @@ export default function Main() {
                   label="Add Todo"
                   variant="outlined"
                   sx={{ minwidth: "40%" }}
+                  value={taskText} // Set the value of the text field
+                  onChange={(e) => setTaskText(e.target.value)} // Update the task text
                 />
               </Grid>
               <Grid item xs={4}>
@@ -451,6 +459,7 @@ export default function Main() {
                             color: "#18182F",
                             backgroundColor: "#F9D72F",
                           }}
+                          onClick={() => handleEditClick(task)}
                         >
                           <EditIcon />
                         </Button>

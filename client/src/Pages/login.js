@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import axios from "axios";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -24,7 +25,31 @@ const LoginPage = () => {
       });
       return;
     }
-    
+    // axios
+    //   .post("http://localhost:8000/api/auth", { email, password })
+    //   .then((response) => {
+    //     navigate("/main");
+    //   })
+    //   .catch((error) => {
+    //     // Handle login error (e.g., incorrect credentials)
+    //     // Display an error message to the user
+    //   });
+
+    const fetchUserSpecificData = (token) => {
+      axios
+        .get("http://localhost:8000/api/auth", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          navigate("/main");
+        })
+        .catch((error) => {
+          // Handle errors, e.g., unauthorized access
+        });
+    };
+
     if (!validatePassword(password)) {
       toast.error("Please enter a valid password.", {
         position: "top-right",
