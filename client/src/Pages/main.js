@@ -53,13 +53,6 @@ function createData(name, calories, fat, carbs, protein) {
   return { name, calories, fat, carbs, protein };
 }
 
-const rows = [
-  createData("Task 1", "2023-10-30", "Completed", "Edit"),
-  createData("Task 2", "2023-11-15", "Pending", "Edit"),
-  createData("Task 3", "2023-12-05", "Completed", "Edit"),
-  createData("Task 4", "2023-12-20", "Pending", "Edit"),
-];
-
 // Inside your Add button click handler
 const addTask = async (selectedDate) => {
   try {
