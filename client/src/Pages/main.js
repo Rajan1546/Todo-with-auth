@@ -55,35 +55,7 @@ function createData(name, calories, fat, carbs, protein) {
 }
 
 // Inside your Add button click handler
-const addTask = async (selectedDate) => {
-  try {
-    const task = document.getElementById("outlined-basic").value;
-    const dueDate = selectedDate && selectedDate.toISOString();
 
-    if (!dueDate) {
-      console.error("Invalid due date");
-      return;
-    }
-    const response = await fetch("http://localhost:8000/api/tasks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ task, dueDate }),
-    });
-
-    if (response.status === 201) {
-      // Task created successfully. You can update your UI accordingly.
-      console.log("Task created successfully");
-    } else {
-      // Handle errors, display error message, etc.
-      const data = await response.json();
-      console.error(data.message);
-    }
-  } catch (error) {
-    console.error("Error creating task", error);
-  }
-};
 
 export default function Main() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -91,14 +63,42 @@ export default function Main() {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [taskText, setTaskText] = useState(""); // Add the taskText state
+  const [selectedTaskData, setSelectedTaskData] = useState({ task: '', dueDate: null });
 
 
+  // const handleEditClick = (task) => {
+  //   setSelectedTask(task);
+  //   setSelectedDate(new Date(task.dueDate)); // Convert dueDate to a Date object
+  //   setTaskText(task.task); // Populate the task text
+  // };
+  // const handleEditClick = (task) => {
+  //   setSelectedTask(task);
+  //   setSelectedDate(new Date(task.dueDate)); // Convert dueDate to a Date object
+  //   setTaskText(task.task); // Populate the task text
+    
+  //   // Set the selected task data
+  //   setSelectedTaskData({
+  //     task: task.task,
+  //     dueDate: new Date(task.dueDate),
+  //   });
+  // };
   const handleEditClick = (task) => {
     setSelectedTask(task);
-    setSelectedDate(new Date(task.dueDate)); // Convert dueDate to a Date object
-    setTaskText(task.task); // Populate the task text
-  };
     
+    // Convert dueDate to a dayjs object
+    const dueDate = task.dueDate ? dayjs(task.dueDate) : null;
+  
+    setSelectedDate(dueDate);
+    setTaskText(task.task);
+  
+    // Set the selected task data
+    setSelectedTaskData({
+      task: task.task,
+      dueDate: dueDate,
+    });
+  };
+  
+  
   useEffect(() => {
     if (cleared) {
       const timeout = setTimeout(() => {
@@ -134,6 +134,38 @@ export default function Main() {
     fetchTasks();
   }, []); // The empty dependency array ensures this effect runs once on component mount.
   
+  const addTask = async (selectedDate) => {
+    try {
+       const task = document.getElementById("outlined-basic").value;
+      const dueDate = selectedDate && selectedDate.toISOString();
+      //const task = selectedTaskData.task;
+      // const dueDate = selectedDate ? selectedDate.toISOString() : null;
+  
+      if (!dueDate) {
+        console.error("Invalid due date");
+        return;
+      }
+      const response = await fetch("http://localhost:8000/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task, dueDate }),
+      });
+  
+      if (response.status === 201) {
+        // Task created successfully. You can update your UI accordingly.
+        console.log("Task created successfully");
+      } else {
+        // Handle errors, display error message, etc.
+        const data = await response.json();
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error creating task", error);
+    }
+  };
+
   const deleteTask = async (taskId) => {
     try {
       const response = await fetch(
@@ -269,8 +301,10 @@ const dueDateObj = dayjs(dueDate).toDate(); // Convert to a JavaScript Date obje
                   label="Add Todo"
                   variant="outlined"
                   sx={{ minwidth: "40%" }}
-                  value={taskText} // Set the value of the text field
-                  onChange={(e) => setTaskText(e.target.value)} // Update the task text
+                  //value={taskText}  Set the value of the text field
+                  value={selectedTaskData.task}
+                  onChange={(e) => setSelectedTaskData({ ...selectedTaskData, task: e.target.value })}
+                  //onChange={(e) => setTaskText(e.target.value)}  Update the task text
                 />
               </Grid>
               <Grid item xs={4}>
@@ -296,8 +330,9 @@ const dueDateObj = dayjs(dueDate).toDate(); // Convert to a JavaScript Date obje
                             },
                           },
                         }}
-                        value={selectedDate}
-                        onChange={(newDate) => setSelectedDate(newDate)} // Update the selected date
+                        value={selectedTaskData.dueDate}
+                        //value={selectedDate}
+                        //onChange={(newDate) => setSelectedDate(newDate)} // Update the selected date
                       />
                     </DemoItem>
 
