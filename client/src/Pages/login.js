@@ -12,6 +12,21 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const fetchUserSpecificData = (token) => {
+    axios
+      .get("http://localhost:8000/api/auth", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        navigate("/main");
+      })
+      .catch((error) => {
+        // Handle errors, e.g., unauthorized access
+      });
+  };
+
   const handleLogin = () => {
     if (!validateEmail(email)) {
       toast.error("Please enter a valid email address.", {
@@ -35,21 +50,8 @@ const LoginPage = () => {
     //     // Display an error message to the user
     //   });
 
-    const fetchUserSpecificData = (token) => {
-      axios
-        .get("http://localhost:8000/api/auth", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          navigate("/main");
-        })
-        .catch((error) => {
-          // Handle errors, e.g., unauthorized access
-        });
-    };
-
+    fetchUserSpecificData()
+    
     if (!validatePassword(password)) {
       toast.error("Please enter a valid password.", {
         position: "top-right",

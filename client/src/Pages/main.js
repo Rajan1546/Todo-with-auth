@@ -82,22 +82,48 @@ export default function Main() {
   //     dueDate: new Date(task.dueDate),
   //   });
   // };
-  const handleEditClick = (task) => {
-    setSelectedTask(task);
+  //*********************************
+  // const handleEditClick = (task) => {
+  //   setSelectedTask(task);
     
-    // Convert dueDate to a dayjs object
-    const dueDate = task.dueDate ? dayjs(task.dueDate) : null;
+  //   // Convert dueDate to a dayjs object
+  //   const dueDate = task.dueDate ? dayjs(task.dueDate) : null;
   
-    setSelectedDate(dueDate);
-    setTaskText(task.task);
+  //   setSelectedDate(dueDate);
+  //   setTaskText(task.task);
   
-    // Set the selected task data
-    setSelectedTaskData({
-      task: task.task,
-      dueDate: dueDate,
-    });
+  //   // Set the selected task data
+  //   setSelectedTaskData({
+  //     task: task.task,
+  //     dueDate: dueDate,
+  //   });
+  // };
+  const handleEditClick = (task) => {
+    // Check if selectedTask is already set, which means we are editing an existing task
+    if (selectedTask) {
+      // Update the existing task
+      updateTask(selectedTask._id, {
+        task: selectedTaskData.task,
+        dueDate: selectedDate ? selectedDate.toISOString() : null,
+      });
+    } else {
+      // Set selectedTask if it's not already set
+      setSelectedTask(task);
+      const dueDate = task.dueDate ? dayjs(task.dueDate) : null;
+      setSelectedDate(dueDate);
+      setTaskText(task.task);
+  
+      setSelectedTaskData({
+        task: task.task,
+        dueDate: dueDate,
+      });
+    }
   };
   
+  const getDefaultDueDate = () => {
+    const currentDate = new Date();
+    return currentDate.toISOString();
+  };
   
   useEffect(() => {
     if (cleared) {
@@ -137,10 +163,11 @@ export default function Main() {
   const addTask = async (selectedDate) => {
     try {
        const task = document.getElementById("outlined-basic").value;
-      const dueDate = selectedDate && selectedDate.toISOString();
+       //const dueDate = selectedDate && selectedDate.toISOString();
       //const task = selectedTaskData.task;
-      // const dueDate = selectedDate ? selectedDate.toISOString() : null;
-  
+      //const dueDate = selectedDate ? selectedDate.toISOString() : null;
+      const dueDate = selectedDate ? selectedDate.toISOString() : getDefaultDueDate();
+        
       if (!dueDate) {
         console.error("Invalid due date");
         return;
@@ -166,6 +193,32 @@ export default function Main() {
     }
   };
 
+  const updateTask = async (taskId, updatedTask) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedTask),
+      });
+  
+      if (response.status === 200) {
+        const data = await response.json();
+        // Task updated successfully. You can update your UI accordingly.
+        console.log("Task updated successfully",data);
+        // After updating, reset selectedTask to null to exit the edit mode
+        setSelectedTask(null);
+      } else {
+        // Handle errors, display error message, etc.
+        const data = await response.json();
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error updating task", error);
+    }
+  };
+  
   const deleteTask = async (taskId) => {
     try {
       const response = await fetch(
