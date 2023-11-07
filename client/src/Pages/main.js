@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { createTheme, ThemeProvider, Box, Button } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { DemoItem } from "@mui/x-date-pickers/internals/demo";
@@ -139,9 +140,15 @@ export default function Main() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/tasks");
+        const token = localStorage.getItem("token");
+        // const response = await fetch("http://localhost:8000/api/tasks");
+        const response = await axios.get("http://localhost:8000/api/tasks", {
+        headers: {
+          token: `${token}`, // Include your authentication token here
+        },
+      });
         if (response.status === 200) {
-          const data = await response.json();
+          const data = response.data;
           console.log(data);
           setTasks(data);
         } else {
@@ -158,7 +165,7 @@ export default function Main() {
     };
 
     fetchTasks();
-  }, []); // The empty dependency array ensures this effect runs once on component mount.
+  }, []);  
   
   const addTask = async (selectedDate) => {
     try {
@@ -172,12 +179,22 @@ export default function Main() {
         console.error("Invalid due date");
         return;
       }
-      const response = await fetch("http://localhost:8000/api/tasks", {
-        method: "POST",
+      // const response = await fetch("http://localhost:8000/api/tasks", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ task, dueDate }),
+      // });
+      const token = localStorage.getItem("token");  
+      const response = await axios.post("http://localhost:8000/api/tasks", {
+        task,
+        dueDate,
+      }, {
         headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ task, dueDate }),
+          Authorization: `Bearer ${token}`,
+        }
       });
   
       if (response.status === 201) {
@@ -195,12 +212,18 @@ export default function Main() {
 
   const updateTask = async (taskId, updatedTask) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
-        method: "PUT",
+      // const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+      //   method: "PUT",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(updatedTask),
+      const token = localStorage.getItem("token"); // Get the authentication token
+      const response = await axios.put(`http://localhost:8000/api/tasks/${taskId}`, updatedTask, {
         headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedTask),
+          Authorization: `Bearer ${token}`,
+        }
       });
   
       if (response.status === 200) {
@@ -221,11 +244,16 @@ export default function Main() {
   
   const deleteTask = async (taskId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/tasks/${taskId}`,
-        {
-          method: "DELETE",
-        }
+      // const response = await fetch(
+      //   `http://localhost:8000/api/tasks/${taskId}`,
+      //   {
+      //     method: "DELETE",
+      //   }
+      const token = localStorage.getItem("token"); // Get the authentication token
+      const response = await axios.delete(`http://localhost:8000/api/tasks/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }}
       );
 
       if (response.status === 200) {

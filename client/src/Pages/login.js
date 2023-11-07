@@ -14,9 +14,9 @@ const LoginPage = () => {
 
   const fetchUserSpecificData = (token) => {
     axios
-      .get("http://localhost:8000/api/auth", {
+      .get("http://localhost:8000/api/tasks", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          token: `${token}`,
         },
       })
       .then((response) => {
@@ -50,7 +50,25 @@ const LoginPage = () => {
     //     // Display an error message to the user
     //   });
 
-    fetchUserSpecificData()
+    axios
+    .post("http://localhost:8000/api/auth", {
+      email: email,
+      password: password,
+    })
+    .then((response) =>{ 
+      const token = response.data.data;
+      console.log(token)
+     //const token = response.data.data;  Assuming the token is in response.data.data
+        localStorage.setItem("token", token);
+       // Call this function after a successful login
+       fetchUserSpecificData(token);
+       console.log(token)
+    })
+    .catch((error) => {
+      // Handle login errors, e.g., incorrect credentials
+      // Display an error message to the user
+    });
+
     
     if (!validatePassword(password)) {
       toast.error("Please enter a valid password.", {
