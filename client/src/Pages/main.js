@@ -193,7 +193,7 @@ export default function Main() {
       }, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          token: `${token}`,
         }
       });
   
@@ -222,7 +222,7 @@ export default function Main() {
       const response = await axios.put(`http://localhost:8000/api/tasks/${taskId}`, updatedTask, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          token: `${token}`,
         }
       });
   
@@ -234,7 +234,7 @@ export default function Main() {
         setSelectedTask(null);
       } else {
         // Handle errors, display error message, etc.
-        const data = await response.json();
+        const data = response.data;
         console.error(data.message);
       }
     } catch (error) {
@@ -250,9 +250,10 @@ export default function Main() {
       //     method: "DELETE",
       //   }
       const token = localStorage.getItem("token"); // Get the authentication token
+      console.log(token)
       const response = await axios.delete(`http://localhost:8000/api/tasks/${taskId}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          token: `${token}`,
         }}
       );
 

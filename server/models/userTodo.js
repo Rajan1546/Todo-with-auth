@@ -11,8 +11,13 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Pending", "Completed"], // You can add more status options
-    default: "Pending", // Default status when creating a task
+    enum: ["Pending", "Completed"],  
+    default: "Pending",  
+  },
+   createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",  
+    required: true,
   },
 });
 
