@@ -227,7 +227,7 @@ export default function Main() {
       });
   
       if (response.status === 200) {
-        const data = await response.json();
+        const data = response.data;
         // Task updated successfully. You can update your UI accordingly.
         console.log("Task updated successfully",data);
         // After updating, reset selectedTask to null to exit the edit mode
@@ -250,7 +250,7 @@ export default function Main() {
       //     method: "DELETE",
       //   }
       const token = localStorage.getItem("token"); // Get the authentication token
-      console.log(token)
+      
       const response = await axios.delete(`http://localhost:8000/api/tasks/${taskId}`, {
         headers: {
           token: `${token}`,

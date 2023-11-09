@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const passwordComplexity = require("joi-password-complexity");
+const { body, validationResult } = require("express-validator"); 
+// const passwordComplexity = require("joi-password-complexity");
 
 const userSchema = new mongoose.Schema({
     // firstName:{type:String,required:true},
@@ -18,15 +19,26 @@ userSchema.methods.generateAuthToken = function () {
 
 const User = mongoose.model("user",userSchema)
 
-const validate = (data) => {
-    const schema = Joi.object({
-        // firstName: Joi.string().required().label("First Name"),
-        // lastName: Joi.string().required().label("Last Name"),
-        email: Joi.string().email().required().label("Email"),
-        password: passwordComplexity().required().label("Password"),
-        cpassword: passwordComplexity().required().label("Confirm Password"),
-    });
-    return schema.validate(data);
-}
-
+// const validate = (data) => {
+//     const schema = Joi.object({
+//         // firstName: Joi.string().required().label("First Name"),
+//         // lastName: Joi.string().required().label("Last Name"),
+//         email: Joi.string().email().required().label("Email"),
+//         password: passwordComplexity().required().label("Password"),
+//         cpassword: passwordComplexity().required().label("Confirm Password"),
+//     });
+//     return schema.validate(data);
+// }
+const validate = () => {
+    return [
+      body("email").isEmail().withMessage("Invalid email format"),
+      body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+    //   body("cpassword").custom((value, { req }) => {
+    //     if (value !== req.body.password) {
+    //       throw new Error("Passwords must match");
+    //     }
+    //     return true;
+    //   }),
+    ];
+  };
 module.exports = {User , validate }
